@@ -11,7 +11,16 @@ from django.db.models.signals import post_save
 
 from rest_framework.decorators import api_view,permission_classes,authentication_classes
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,BasePermission
+
+
+
+class usercandelete(BasePermission):
+
+    def has_permission(self, request, view):
+        if request.user.groups.filter(name='Can-Delete').exists():
+            return True
+        return False
 
 
 @api_view(['POST'])
@@ -23,7 +32,17 @@ def sign_up(request):
         data['response'] = 'successfully registered new user.'
         data['email'] = account.email
         data['username'] = account.username
-        # data['token'] = Token.objects.get(user=userSerializer).key
+        data['token'] = Token.objects.get(user=userSerializer).key
+    else:
+        data = serializer.errors
+    return Response(data)
+
+@api_view(['POST'])
+def log_out(request):
+    serializer = userSerializer(data=request.data)
+    data = {}
+    if serializer.is_valid():
+        data['token'] = Token.objects.get(user=userSerializer).delete
     else:
         data = serializer.errors
     return Response(data)
@@ -70,6 +89,7 @@ def detail_movie(requset,pk):
     serializer = movieSerializer(instance=movies)
     return Response(data=serializer.data)
 
+@permission_classes([usercandelete])
 @api_view(['DELETE'])
 def delete_movie(requset,pk):
 

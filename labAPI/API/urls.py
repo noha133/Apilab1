@@ -12,6 +12,7 @@ urlpatterns = [
     path('hello',hello,name='hello'),
     path('signup',sign_up,name='signup'),
     path('login', obtain_auth_token, name="login"),
+    path('logout', log_out, name="logout"),
     path('list',movie_list,name='list'),
     path('create',create_movie,name='create'),
     path('detail/<int:pk>/',detail_movie,name='detail'),
